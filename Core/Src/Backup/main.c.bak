@@ -110,6 +110,7 @@ int main(void)
   FullProcessedData acc_full_data;
   FullProcessedData mag_full_data;
   RawData acc_raw_data;
+  uint8_t flash_id=2;
 
   /* USER CODE END 2 */
 
@@ -128,6 +129,8 @@ int main(void)
     printf("ACC: X=%.2f mg, Y=%.2f mg, Z=%.2f mg\r\n", acc_full_data.x, acc_full_data.y, acc_full_data.z);
     printf("MAG: X=%.2f mG, Y=%.2f mG, Z=%.2f mG\r\n", mag_full_data.x, mag_full_data.y, mag_full_data.z);
     print_heading(mag_full_data.x, mag_full_data.y);
+     // flash_id = Flash_ReadID();
+     // printf("FLASH_ID: %d\r\n", flash_id);
      HAL_Delay(1000); // Opóźnienie dla czytelności w terminalu
     //printf("OUT_X: %f DPS, OUT_Y: %f DPS, OUT_Z: %f DPS, OUT_TEMP: %fC\r\n ",gyro_full_data.x_dps ,gyro_full_data.y_dps ,gyro_full_data.z_dps ,gyro_full_data.temperature_c );
     //HAL_Delay(100);

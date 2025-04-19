@@ -59,6 +59,16 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define MAG_CS_Pin GPIO_PIN_0
 #define MAG_CS_GPIO_Port GPIOC
+#define JOY_CENTER_Pin GPIO_PIN_0
+#define JOY_CENTER_GPIO_Port GPIOA
+#define JOY_LEFT_Pin GPIO_PIN_1
+#define JOY_LEFT_GPIO_Port GPIOA
+#define JOY_RIGHT_Pin GPIO_PIN_2
+#define JOY_RIGHT_GPIO_Port GPIOA
+#define JOY_UP_Pin GPIO_PIN_3
+#define JOY_UP_GPIO_Port GPIOA
+#define JOY_DOWN_Pin GPIO_PIN_5
+#define JOY_DOWN_GPIO_Port GPIOA
 #define LD4_Pin GPIO_PIN_2
 #define LD4_GPIO_Port GPIOB
 #define LD5_Pin GPIO_PIN_8

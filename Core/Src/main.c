@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "lcd.h"
 #include "quadspi.h"
 #include "spi.h"
 #include "usart.h"
@@ -101,6 +102,7 @@ int main(void)
   MX_SPI2_Init();
   MX_USART2_UART_Init();
   MX_QUADSPI_Init();
+  MX_LCD_Init();
   /* USER CODE BEGIN 2 */
   //gyro_init();
   //gyro_calibrate();
@@ -110,6 +112,7 @@ int main(void)
   FullProcessedData acc_full_data;
   FullProcessedData mag_full_data;
   RawData acc_raw_data;
+  uint8_t flash_id=2;
 
   /* USER CODE END 2 */
 
@@ -128,6 +131,8 @@ int main(void)
     printf("ACC: X=%.2f mg, Y=%.2f mg, Z=%.2f mg\r\n", acc_full_data.x, acc_full_data.y, acc_full_data.z);
     printf("MAG: X=%.2f mG, Y=%.2f mG, Z=%.2f mG\r\n", mag_full_data.x, mag_full_data.y, mag_full_data.z);
     print_heading(mag_full_data.x, mag_full_data.y);
+     // flash_id = Flash_ReadID();
+     // printf("FLASH_ID: %d\r\n", flash_id);
      HAL_Delay(1000); // Opóźnienie dla czytelności w terminalu
     //printf("OUT_X: %f DPS, OUT_Y: %f DPS, OUT_Z: %f DPS, OUT_TEMP: %fC\r\n ",gyro_full_data.x_dps ,gyro_full_data.y_dps ,gyro_full_data.z_dps ,gyro_full_data.temperature_c );
     //HAL_Delay(100);
@@ -163,14 +168,13 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
-  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
-  RCC_OscInitStruct.MSICalibrationValue = 0;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 40;
+  RCC_OscInitStruct.PLL.PLLN = 20;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
