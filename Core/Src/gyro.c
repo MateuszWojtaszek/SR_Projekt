@@ -11,6 +11,7 @@ float bias_z = 0.0f;
 
 void gyro_write(uint8_t reg, uint8_t data) {
   uint8_t tx[2] = {reg & 0x7F, data};
+  HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
   HAL_SPI_Transmit(&hspi2, tx, 2, 1000);
   HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
@@ -53,12 +54,13 @@ void gyro_calibrate(void) {
 }
 
 void gyro_read_data(GyroFullProcessedData *gyro_full_data) {
-  const uint8_t tx = OUT_X_L | 0xC0;
   uint8_t rx[6];
-  HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_Transmit(&hspi2, &tx, 1, 1000);
-  HAL_SPI_Receive(&hspi2, rx, 6, 1000);
+  rx[0] = gyro_read(OUT_X_L);
+  rx[1] = gyro_read(OUT_X_H);
+  rx[2] = gyro_read(OUT_Y_L);
+  rx[3] = gyro_read(OUT_Y_H);
+  rx[4] = gyro_read(OUT_Z_L);
+  rx[5] = gyro_read(OUT_Z_H);
   uint8_t temp = gyro_read(OUT_TEMP);
   gyro_full_data->x_dps = ((float)((int16_t)(rx[1] << 8) | rx[0])/17.5f) - bias_x;
   gyro_full_data->y_dps = ((float)((int16_t)(rx[3] << 8) | rx[2])/17.5f) - bias_y;

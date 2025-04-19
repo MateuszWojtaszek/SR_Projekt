@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    quadspi.h
+  * @file    lcd.h
   * @brief   This file contains all the function prototypes for
-  *          the quadspi.c file
+  *          the lcd.c file
   ******************************************************************************
   * @attention
   *
@@ -18,8 +18,8 @@
   */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __QUADSPI_H__
-#define __QUADSPI_H__
+#ifndef __LCD_H__
+#define __LCD_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,23 +32,21 @@ extern "C" {
 
 /* USER CODE END Includes */
 
-extern QSPI_HandleTypeDef hqspi;
+extern LCD_HandleTypeDef hlcd;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_QUADSPI_Init(void);
+void MX_LCD_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-  uint8_t Flash_ReadID(void);
-  uint8_t Flash_ReadID(void);
-  uint8_t Flash_ReadID(void);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __QUADSPI_H__ */
+#endif /* __LCD_H__ */
 
