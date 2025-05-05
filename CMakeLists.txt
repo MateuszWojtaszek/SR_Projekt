@@ -28,13 +28,11 @@ include("cmake/gcc-arm-none-eabi.cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 add_compile_options(-std=c23)
 
-# Enable CMake support for ASM and C languages
-enable_language(C ASM)
-
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
-
+# Enable CMake support for ASM and C languages
+enable_language(C ASM)
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
 
@@ -51,6 +49,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/gyro.c
         Core/Src/LSM303C.c
+        Core/Src/calculations.c
+        Core/Src/flash.cpp
 )
 
 # Add include paths

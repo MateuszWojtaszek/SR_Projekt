@@ -59,6 +59,9 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define MAG_CS_Pin GPIO_PIN_0
 #define MAG_CS_GPIO_Port GPIOC
+#define MAG_DRDY_Pin GPIO_PIN_2
+#define MAG_DRDY_GPIO_Port GPIOC
+#define MAG_DRDY_EXTI_IRQn EXTI2_IRQn
 #define JOY_CENTER_Pin GPIO_PIN_0
 #define JOY_CENTER_GPIO_Port GPIOA
 #define JOY_LEFT_Pin GPIO_PIN_1
@@ -87,8 +90,14 @@ void Error_Handler(void);
 #define FLASH_D3_GPIO_Port GPIOE
 #define GYRO_CS_Pin GPIO_PIN_7
 #define GYRO_CS_GPIO_Port GPIOD
+#define GYRO_INT_Pin GPIO_PIN_8
+#define GYRO_INT_GPIO_Port GPIOB
+#define GYRO_INT_EXTI_IRQn EXTI9_5_IRQn
 #define ACCEL_CS_Pin GPIO_PIN_0
 #define ACCEL_CS_GPIO_Port GPIOE
+#define ACCEL_INT_Pin GPIO_PIN_1
+#define ACCEL_INT_GPIO_Port GPIOE
+#define ACCEL_INT_EXTI_IRQn EXTI1_IRQn
 
 /* USER CODE BEGIN Private defines */
 

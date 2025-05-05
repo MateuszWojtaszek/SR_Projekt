@@ -29,6 +29,8 @@
 #include "gyro.h"
 #include <stdint.h>
 #include <stdio.h>
+
+#include "calculations.h"
 #include "LSM303C.h"
 /* USER CODE END Includes */
 
@@ -69,6 +71,21 @@ void print_heading(float M_X, float M_Y) {
   float heading = calculate_heading(M_X, M_Y);
   printf("Heading (Północ): %.2f°\r\n", heading);
 }
+
+volatile uint8_t gyro_data_ready_flag = 0;
+volatile uint8_t acc_data_ready_flag = 0;
+volatile uint8_t mag_data_ready_flag = 0;
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  if (GPIO_Pin == GYRO_INT_Pin) {
+    gyro_data_ready_flag = 1;
+  }
+  if (GPIO_Pin == ACCEL_INT_Pin) {
+    acc_data_ready_flag = 1;
+  }
+  if (GPIO_Pin == MAG_DRDY_Pin) {
+    mag_data_ready_flag = 1;
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -104,17 +121,24 @@ int main(void)
   MX_QUADSPI_Init();
   MX_LCD_Init();
   /* USER CODE BEGIN 2 */
-  printf("User Inits!\n");
+  printf("User Inits!\r\n");
   gyro_init();
-  //gyro_calibrate();
-  GyroFullProcessedData gyro_full_data;
+  gyro_selftest_calibrate();
   acc_init();
+  accel_selftest_calibrate();
   mag_init();
   FullProcessedData acc_full_data;
   FullProcessedData mag_full_data;
+  GyroFullProcessedData gyro_full_data;
   // RawData acc_raw_data;
   // uint8_t flash_id=2;
+  Orientation current_orientation = {0.0f, 0.0f, 0.0f};
+  uint32_t last_update_time = 0;
+  uint32_t current_time = 0;
+  float dt = 0.0f;
 
+  // Inicjalizacja przed pętlą
+  last_update_time = HAL_GetTick();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -123,26 +147,63 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    gyro_read_data(&gyro_full_data);
-    acc_read_data(&acc_full_data);
-    mag_read_data(&mag_full_data);
-    // acc_read_raw_data(&acc_raw_data);
-    // printf("RAW ACC: X=%d, Y=%d, Z=%d\r\n", acc_raw_data.x, acc_raw_data.y, acc_raw_data.z);
+    current_time = HAL_GetTick();
+    // Oblicz dt w sekundach (HAL_GetTick zwraca milisekundy)
+    dt = (float)(current_time - last_update_time) / 1000.0f;
+    last_update_time = current_time;
+
+    // Zabezpieczenie przed zerowym dt przy pierwszym uruchomieniu lub bardzo szybkich pętlach
+    if (dt <= 0.0f) {
+      dt = 0.01f; // Przyjmij jakąś małą wartość lub kontynuuj
+    }
+    if (gyro_data_ready_flag)
+    {
+      gyro_data_ready_flag = 0;
+      gyro_read_data(&gyro_full_data);
+      //printf("OUT_X: %.2f DPS, OUT_Y: %.2f DPS, OUT_Z: %.2f DPS, OUT_TEMP: %.2fC\r\n",
+      //       gyro_full_data.x_dps, gyro_full_data.y_dps, gyro_full_data.z_dps, gyro_full_data.temperature_c);
+    }
+    if (acc_data_ready_flag)
+    {
+      acc_data_ready_flag = 0;
+      acc_read_data(&acc_full_data);
+      //printf("ACC: X=%.2f mg, Y=%.2f mg, Z=%.2f mg\r\n", acc_full_data.x, acc_full_data.y, acc_full_data.z);
+    }
+    if (mag_data_ready_flag)
+    {
+      mag_data_ready_flag = 0;
+      mag_read_data(&mag_full_data);
+      //printf("MAG: X=%.2f mG, Y=%.2f mG, Z=%.2f mG\r\n", mag_full_data.x, mag_full_data.y, mag_full_data.z);
+      //print_heading(mag_full_data.x, mag_full_data.y);
+    }
+    // gdzieś w kodzie:
+    // Vector3f acc_vec = {acc_full_data.x, acc_full_data.y, acc_full_data.z};
+    // Vector3f mag_vec = {mag_full_data.x, mag_full_data.y, mag_full_data.z};
+    //Stare
+    //Orientation ori = calculate_orientation_from_accel_mag(acc_vec, mag_vec);
+    // Nowe wywołanie:
+    // Upewnij się, że masz wektory acc_vec, mag_vec ORAZ gyro_vec
+    Vector3f acc_vec = {acc_full_data.x, acc_full_data.y, acc_full_data.z};
+    Vector3f mag_vec = {mag_full_data.x, mag_full_data.y, mag_full_data.z};
+    // WAŻNE: Upewnij się, że dane z żyroskopu są w stopniach na sekundę!
+    Vector3f gyro_vec = {gyro_full_data.x_dps, gyro_full_data.y_dps, gyro_full_data.z_dps};
+
+    calculate_orientation_complementary(&current_orientation, acc_vec, mag_vec, gyro_vec, dt);
+
+    // Teraz używaj wartości z current_orientation
+    printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n",
+           gyro_full_data.x_dps, gyro_full_data.y_dps, gyro_full_data.z_dps,
+           acc_full_data.x, acc_full_data.y, acc_full_data.z,
+           mag_full_data.x, mag_full_data.y, mag_full_data.z,
+           current_orientation.roll, current_orientation.pitch, current_orientation.yaw); // Używamy zaktualizowanej zmiennej
+    // if (HAL_GPIO_ReadPin(ACCEL_INT_GPIO_Port, ACCEL_INT_Pin) == GPIO_PIN_SET) {
+    //   printf("ACCEL_INT = HIGH\r\n");
+    // } else {
+    //   printf("ACCEL_INT = LOW\r\n");
+    // }
     // HAL_Delay(100);
-    printf("ACC: X=%.2f mg, Y=%.2f mg, Z=%.2f mg\r\n", acc_full_data.x, acc_full_data.y, acc_full_data.z);
-    printf("MAG: X=%.2f mG, Y=%.2f mG, Z=%.2f mG\r\n", mag_full_data.x, mag_full_data.y, mag_full_data.z);
-    printf("OUT_X: %f DPS, OUT_Y: %f DPS, OUT_Z: %f DPS, OUT_TEMP: %fC\r\n ",gyro_full_data.x_dps ,gyro_full_data.y_dps ,gyro_full_data.z_dps ,gyro_full_data.temperature_c );
-    print_heading(mag_full_data.x, mag_full_data.y);
-    HAL_Delay(1000);
-    // uint8_t test_value1 = acc_read(OUT_Z_L);
-    // uint8_t test_value2 = acc_read(OUT_Z_H);
-    // uint16_t test = (test_value2 << 8) | test_value1;
-    // float test_after = (float)((int16_t)((test_value2 << 8) | test_value1))*0.122f;
-    //
-    //
-    //  printf("OUT_X_L: %d, OUT_X_H: %d, OUT_X_raw: %d, OUT_Z_after:  %fmg\r\n", test_value1, test_value2, test, test_after);
-    // HAL_Delay(100);
-    // HAL_UART_Transmit(&huart2, (uint8_t*)&out_x_value, 2, 1000);
+    // uint8_t status = acc_read(STATUS_REG_A);
+    // printf("ACC STATUS: 0x%02X\r\n", status);
   }
   /* USER CODE END 3 */
 }
