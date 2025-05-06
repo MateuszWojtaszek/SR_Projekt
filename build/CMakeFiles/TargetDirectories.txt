@@ -1,5 +1,0 @@
-/Users/mateuszwojtaszek/projekty/cmake_stm32l476/build/CMakeFiles/cmake_stm32l476.dir
-/Users/mateuszwojtaszek/projekty/cmake_stm32l476/build/CMakeFiles/edit_cache.dir
-/Users/mateuszwojtaszek/projekty/cmake_stm32l476/build/CMakeFiles/rebuild_cache.dir
-/Users/mateuszwojtaszek/projekty/cmake_stm32l476/build/cmake/stm32cubemx/CMakeFiles/edit_cache.dir
-/Users/mateuszwojtaszek/projekty/cmake_stm32l476/build/cmake/stm32cubemx/CMakeFiles/rebuild_cache.dir
