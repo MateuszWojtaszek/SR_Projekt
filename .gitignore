@@ -206,4 +206,24 @@ CMakeUserPresets.json
 # External projects
 *-prefix/
 
+.cache/
+CMakeFiles/
+build/
+CMakeCache.txt
+compile_commands.json
+Makefile
+*.lock
+*.old
+*.elf
+*.map
+*.bak
+*.ninja
+.vscode/
+.lock
+.old
+.elf
+.map
+.s
+stm_main/CMakePresets.json
+
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake
