@@ -15,7 +15,7 @@ set(CMAKE_C_EXTENSIONS ON)
 
 # Define the build type
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Debug")
+  set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
 # Set the project name
@@ -50,7 +50,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/gyro.c
         Core/Src/LSM303C.c
         Core/Src/calculations.c
-        Core/Src/flash.cpp
+        Core/Src/flash.c
 )
 
 # Add include paths
