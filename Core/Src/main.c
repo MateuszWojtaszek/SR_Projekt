@@ -120,9 +120,9 @@ int main(void) {
   /* USER CODE BEGIN 2 */
   printf("User Inits!\r\n");
   gyro_init();
-  // gyro_selftest_calibrate();
+  gyro_selftest_calibrate();
   acc_init();
-  // accel_selftest_calibrate();
+  accel_selftest_calibrate();
   mag_init();
   printf("Inicjalizacja QSPI Flash...\r\n");
   if (Flash_Init() != QSPI_OK) {
@@ -132,6 +132,11 @@ int main(void) {
   FullProcessedData acc_full_data;
   FullProcessedData mag_full_data;
   GyroFullProcessedData gyro_full_data;
+  // NOWE ZMIENNE: Inicjalizacja zmiennych dla prędkości, przemieszczenia
+  Vector3f predkosc_w_ukladzie_swiata = {0.0f, 0.0f, 0.0f};
+  Vector3f przemieszczenie_w_ukladzie_swiata = {0.0f, 0.0f, 0.0f};
+  // float przebyty_dystans_calkowity = 0.0f; // Można dodać, jeśli potrzebny jest całkowity dystans skalarny
+  Vector3f przyspieszenie_liniowe_swiat;     // Do przechowywania wyniku z oblicz_przyspieszenie_liniowe_swiat
   // RawData acc_raw_data;
   // uint8_t flash_id=2;
   Orientation current_orientation = {0.0f, 0.0f, 0.0f};
@@ -181,42 +186,59 @@ int main(void) {
 
     // Zabezpieczenie przed zerowym dt przy pierwszym uruchomieniu lub bardzo
     // szybkich pętlach
-    //   if (dt <= 0.0f) {
-    //     dt = 0.01f; // Przyjmij jakąś małą wartość lub kontynuuj
-    //   }
-    //   if (gyro_data_ready_flag)
-    //   {
-    //     gyro_data_ready_flag = 0;
-    //     gyro_read_data(&gyro_full_data);
-    //   }
-    //   if (acc_data_ready_flag)
-    //   {
-    //     acc_data_ready_flag = 0;
-    //     acc_read_data(&acc_full_data);
-    //   }
-    //   if (mag_data_ready_flag)
-    //   {
-    //     mag_data_ready_flag = 0;
-    //     mag_read_data(&mag_full_data);
-    //   }
-    //
-    //   Vector3f acc_vec = {acc_full_data.x, acc_full_data.y, acc_full_data.z};
-    //   Vector3f mag_vec = {mag_full_data.x, mag_full_data.y, mag_full_data.z};
-    //   // WAŻNE: Upewnij się, że dane z żyroskopu są w stopniach na sekundę!
-    //   Vector3f gyro_vec = {gyro_full_data.x_dps, gyro_full_data.y_dps,
-    //   gyro_full_data.z_dps};
-    //
-    //   calculate_orientation_complementary(&current_orientation, acc_vec,
-    //   mag_vec, gyro_vec, dt);
-    //   printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n",
-    //          gyro_full_data.x_dps, gyro_full_data.y_dps,
-    //          gyro_full_data.z_dps, acc_full_data.x, acc_full_data.y,
-    //          acc_full_data.z, mag_full_data.x, mag_full_data.y,
-    //          mag_full_data.z, current_orientation.roll,
-    //          current_orientation.pitch, current_orientation.yaw); // Używamy
-    //          zaktualizowanej zmiennej
-    //
+    if (dt <= 0.0f) {
+      dt = 0.001f; // Przyjmij jakąś małą wartość lub kontynuuj
+    }
+    if (gyro_data_ready_flag)
+    {
+      gyro_data_ready_flag = 0;
+      gyro_read_data(&gyro_full_data);
+    }
+    if (acc_data_ready_flag)
+    {
+      acc_data_ready_flag = 0;
+      acc_read_data(&acc_full_data);
+    }
+    if (mag_data_ready_flag)
+    {
+      mag_data_ready_flag = 0;
+      mag_read_data(&mag_full_data);
+    }
+
+    Vector3f acc_vec = {acc_full_data.x, acc_full_data.y, acc_full_data.z};
+    Vector3f mag_vec = {mag_full_data.x, mag_full_data.y, mag_full_data.z};
+    Vector3f gyro_vec = {gyro_full_data.x_dps, gyro_full_data.y_dps,
+    gyro_full_data.z_dps};
+
+    calculate_orientation_complementary(&current_orientation, acc_vec,
+    mag_vec, gyro_vec, dt);
+    printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n",
+           gyro_full_data.x_dps, gyro_full_data.y_dps,
+           gyro_full_data.z_dps, acc_full_data.x, acc_full_data.y,
+           acc_full_data.z, mag_full_data.x, mag_full_data.y,
+           mag_full_data.z, current_orientation.roll,
+           current_orientation.pitch, current_orientation.yaw); // Używamy
+           //zaktualizowanej zmiennej
+    //    Używamy acc_vec_mps2 (akceleracja w m/s^2)
+    oblicz_przyspieszenie_liniowe_swiat(acc_vec, &current_orientation, STALA_GRAWITACYJNA, &przyspieszenie_liniowe_swiat);
+
+    // 3. Aktualizacja prędkości w układzie świata
+    aktualizuj_predkosc_swiat(&predkosc_w_ukladzie_swiata, przyspieszenie_liniowe_swiat, dt);
+
+    // 4. Aktualizacja przemieszczenia w układzie świata
+    aktualizuj_przemieszczenie_swiat(&przemieszczenie_w_ukladzie_swiata, predkosc_w_ukladzie_swiata, dt);
+
+    // (Opcjonalnie) Aktualizacja całkowitego przebytego dystansu skalarnego
+    // float przebyty_dystans_calkowity_temp = 0; // Jeśli chcesz śledzić w pętli
+    // aktualizuj_przebyty_dystans(&przebyty_dystans_calkowity_temp, predkosc_w_ukladzie_swiata, dt); // Jeśli dystans jest globalny, przekaż jego wskaźnik
+
+    // NOWY printf dla obliczonego przyspieszenia liniowego i przemieszczenia
+    printf("LinAccWorld: X=%.2f Y=%.2f Z=%.2f m/s^2 | Displacement: X=%.2f Y=%.2f Z=%.2f m\r\n",
+           przyspieszenie_liniowe_swiat.x, przyspieszenie_liniowe_swiat.y, przyspieszenie_liniowe_swiat.z,
+           przemieszczenie_w_ukladzie_swiata.x, przemieszczenie_w_ukladzie_swiata.y, przemieszczenie_w_ukladzie_swiata.z);
+    HAL_Delay(100);
   }
+
   /* USER CODE END 3 */
 }
 
