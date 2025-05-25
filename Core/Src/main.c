@@ -19,23 +19,23 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "gpio.h"
-#include "lcd.h" // Pozostawione, jeśli MX_LCD_Init() zależy od tego
+#include "lcd.h"
 #include "quadspi.h"
 #include "spi.h"
 #include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "gyro.h" // Zakładam, że tutaj są definicje GyroFullProcessedData itp.
+#include "gyro.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "LSM303C.h"      // Zakładam, że tutaj są definicje FullProcessedData
-#include "calculations.h" // Zakładam, że tutaj jest definicja Orientation i funkcje obliczeniowe
+#include "LSM303C.h"
+#include "calculations.h"
 #include "flash.h"
 
-#include "bsp_lcd_glass.h" // Dołączamy sterownik wyświetlacza LCD
+#include "bsp_lcd_glass.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +57,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-volatile uint32_t lcd_test_counter = 0; // Licznik dla testu LCD
+volatile uint32_t lcd_test_counter = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -147,11 +147,6 @@ uint16_t crc16_ccitt_false(const uint8_t *data, size_t length) {
 }
 
 /* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -179,11 +174,10 @@ int main(void)
   MX_SPI2_Init();
   MX_USART2_UART_Init();
   MX_QUADSPI_Init();
-  MX_LCD_Init(); /* Zakładam, że ta inicjalizacja jest potrzebna */
+  MX_LCD_Init();
   /* USER CODE BEGIN 2 */
   printf("User Inits!\r\n");
 
-  // Inicjalizacja wyświetlacza LCD Glass PO MX_LCD_Init()
   BSP_LCD_GLASS_Init();
   printf("LCD Glass Initialized.\r\n");
 
@@ -215,9 +209,9 @@ int main(void)
     printf("Inicjalizacja Flash OK.\r\n");
   }
 
-  FullProcessedData acc_full_data = {0}; // Inicjalizacja zerami
-  FullProcessedData mag_full_data = {0}; // Inicjalizacja zerami
-  GyroFullProcessedData gyro_full_data = {0}; // Inicjalizacja zerami
+  FullProcessedData acc_full_data = {0};
+  FullProcessedData mag_full_data = {0};
+  GyroFullProcessedData gyro_full_data = {0};
   Orientation current_orientation = {0.0f, 0.0f, 0.0f};
   // Stałe wartości GPS
   const float gps_latitude = WROCLAW_LATITUDE;
