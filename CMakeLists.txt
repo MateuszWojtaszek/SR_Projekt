@@ -51,6 +51,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         Core/Src/LSM303C.c
         Core/Src/calculations.c
         Core/Src/flash.c
+        Core/Src/bsp_lcd_glass.c
 )
 
 # Add include paths
