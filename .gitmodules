@@ -1,0 +1,3 @@
+[submodule "rtt_logger"]
+	path = rtt_logger
+	url = https://github.com/thefoolGame/rtt_logger.git

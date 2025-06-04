@@ -38,6 +38,7 @@ add_executable(${CMAKE_PROJECT_NAME})
 
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
+add_subdirectory(rtt_logger)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -52,6 +53,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         Core/Src/calculations.c
         Core/Src/flash.c
         Core/Src/bsp_lcd_glass.c
+        Core/Src/menu.c
 )
 
 # Add include paths
@@ -73,4 +75,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
 
     # Add user defined libraries
+    rtt_logger
 )
